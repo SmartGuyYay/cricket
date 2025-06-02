@@ -97,26 +97,23 @@
   const eventWrapper = document.getElementById('event-wrapper');
   const eventText = document.getElementById('event-text');
 
-  function triggerEvent(type, text) {
+  let decisionPendingActive = false;
+
+  function triggerEvent(type, text, persistent = false) {
     background.classList.add('show');
     lineContainer.style.display = 'block';
     eventWrapper.style.display = 'flex';
 
-    if (text === "RED LINE INCOMING") {
-      lineContainer.style.background = '#ff0000';
-      eventText.style.color = 'white';
-    } else if (text === "YELLOW LINE INCOMING" || text === "CAPTAIN'S CHALLENGE") {
-      lineContainer.style.background = 'yellow';
-      eventText.style.color = '#000000';
-    } else if (text === "PENALTY!") {
-      lineContainer.style.background = 'white'; // changed from red to yellow
-      eventText.style.color = '#000000';
-    } else if (text === "GOAL!" || text === "TRY!") {
-      lineContainer.style.background = type;
-      eventText.style.color = '#000000';
-    } else if (type === 'gradient') {
-      lineContainer.style.background = 'linear-gradient(to right, maroon, blue)';
-      eventText.style.color = 'white';
+    // Color setup
+    if (text === "DECISION PENDING") {
+      lineContainer.style.background = '#00bfff';
+      eventText.style.color = '#ffffff';
+    } else if (text === "OUT") {
+      lineContainer.style.background = 'red';
+      eventText.style.color = '#ffffff';
+    } else if (text === "NOT OUT") {
+      lineContainer.style.background = 'green';
+      eventText.style.color = '#ffffff';
     } else {
       lineContainer.style.background = type;
       eventText.style.color = 'white';
@@ -133,43 +130,11 @@
 
     setTimeout(() => {
       eventText.textContent = text;
-
-      if (text === "CAPTAIN'S CHALLENGE" || text === "YELLOW LINE INCOMING" || text === "RED LINE INCOMING") {
-        eventWrapper.classList.add('lowered');
-        eventText.classList.add('lowered-text');
-      }
-
       eventText.style.animation = 'revealText 1s forwards';
     }, 1600);
 
-    if (text === "YELLOW LINE INCOMING" || text === "RED LINE INCOMING") {
-      setTimeout(() => {
-        let countdown = 5;
-        eventText.style.fontSize = '6em';
-        eventText.style.opacity = 1;
-
-        const countdownInterval = setInterval(() => {
-          eventText.textContent = countdown;
-          countdown--;
-          if (countdown < 0) {
-            clearInterval(countdownInterval);
-
-            setTimeout(() => {
-              eventText.style.animation = 'fadeText 0.5s forwards';
-              lineContainer.style.animation = 'closeLine 2.5s forwards';
-            }, 500);
-
-            setTimeout(() => {
-              lineContainer.style.display = 'none';
-              eventWrapper.style.display = 'none';
-              background.classList.remove('show');
-              eventWrapper.classList.remove('lowered');
-              eventText.className = 'event-text';
-            }, 3000);
-          }
-        }, 1000);
-      }, 3200);
-    } else {
+    if (!persistent) {
+      // Auto fade
       setTimeout(() => {
         setTimeout(() => {
           lineContainer.style.animation = 'closeLine 2.5s forwards';
@@ -178,7 +143,6 @@
             lineContainer.style.display = 'none';
             eventWrapper.style.display = 'none';
             background.classList.remove('show');
-            eventWrapper.classList.remove('lowered');
             eventText.className = 'event-text';
           }, 2500);
         }, 1000);
@@ -186,19 +150,48 @@
     }
   }
 
+  function clearOverlay() {
+    eventText.style.animation = 'fadeText 2.5s forwards';
+    lineContainer.style.animation = 'closeLine 2.5s forwards';
+    setTimeout(() => {
+      lineContainer.style.display = 'none';
+      eventWrapper.style.display = 'none';
+      background.classList.remove('show');
+      eventText.className = 'event-text';
+      decisionPendingActive = false;
+    }, 2500);
+  }
+
   document.addEventListener('keydown', e => {
     const key = e.key.toLowerCase();
+
     if (key === 't') triggerEvent('#ffcc00', 'FOUR!');
     if (key === 'g') triggerEvent('#00ff00', 'SIX!');
     if (key === 'p') triggerEvent('white', 'WICKET!');
     if (key === 'c') triggerEvent('#FFFF00', "AUSTRALIA REVIEW");
-    if (key === 'n') triggerEvent('#FFFF00', 'SOUTH AFRICA REVIEW!');
-    if (key === 'f') triggerEvent('#00bfff', 'DECISION PENDING');
     if (key === 'd') triggerEvent('orange', 'DROPOUT!');
     if (key === '6') triggerEvent('purple', '6 AGAIN!');
     if (key === ' ') triggerEvent('purple', '');
     if (key === '1') triggerEvent('red', '');
     if (key === '4') triggerEvent('red', '');
+
+    // DECISION PENDING - stays until out or not out
+    if (key === 'f') {
+      decisionPendingActive = true;
+      triggerEvent('#00bfff', 'DECISION PENDING', true);
+    }
+
+    // NOT OUT
+    if (key === 'n' && decisionPendingActive) {
+      triggerEvent('green', 'NOT OUT', true);
+      setTimeout(clearOverlay, 3000);
+    }
+
+    // OUT
+    if (key === 'o' && decisionPendingActive) {
+      triggerEvent('red', 'OUT', true);
+      setTimeout(clearOverlay, 3000);
+    }
   });
 
   window.onload = () => {
@@ -207,6 +200,7 @@
     eventWrapper.style.display = 'none';
   };
 </script>
+
 
 </body>
 </html>
