@@ -188,9 +188,17 @@
 
   document.addEventListener('keydown', e => {
     const key = e.key.toLowerCase();
-    if (key === '4') triggerEvent('#ffcc00', 'FOUR!');
-    if (key === '6') triggerEvent('#00ff00', 'SIX!');
-    if (key === 'W') triggerEvent('white', 'WICKET!');
+    if (key === 't') triggerEvent('#ffcc00', 'FOUR!');
+    if (key === 'g') triggerEvent('#00ff00', 'SIX!');
+    if (key === 'p') triggerEvent('white', 'WICKET!');
+    if (key === 'c') triggerEvent('#FFFF00', "AUSTRALIA REVIEW");
+    if (key === 'n') triggerEvent('#FFFF00', 'SOUTH AFRICA REVIEW!');
+    if (key === 'f') triggerEvent('#00bfff', 'DECISION PENDING');
+    if (key === 'd') triggerEvent('orange', 'DROPOUT!');
+    if (key === '6') triggerEvent('purple', '6 AGAIN!');
+    if (key === ' ') triggerEvent('purple', '');
+    if (key === '1') triggerEvent('red', '');
+    if (key === '4') triggerEvent('red', '');
   });
 
   window.onload = () => {
